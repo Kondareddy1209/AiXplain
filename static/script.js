@@ -5,7 +5,7 @@ function askTutor() {
         return;
     }
 
-    fetch("https://your-backend-url.onrender.com/ask", { // UPDATE URL
+    fetch("https://your-backend.onrender.com/ask", {  // Use full backend URL
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query: question })
