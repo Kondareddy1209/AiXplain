@@ -1,24 +1,21 @@
 function askTutor() {
-    let query = document.getElementById("query").value;
-    if (!query.trim()) {
+    let question = document.getElementById("query").value;
+    if (!question.trim()) {
         alert("Please enter a question!");
         return;
     }
 
-    fetch("/ask", {
+    fetch("https://your-backend-url.onrender.com/ask", { // UPDATE URL
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: query })
+        body: JSON.stringify({ query: question })
     })
     .then(response => response.json())
     .then(data => {
-        if (data.error) {
-            document.getElementById("response").innerText = "❌ " + data.error;
-        } else {
-            document.getElementById("response").innerText = "💡 " + data.response;
-        }
+        document.getElementById("response").innerText = "💡 AI Tutor: " + data.answer;
     })
     .catch(error => {
-        document.getElementById("response").innerText = "❌ Error contacting server.";
+        document.getElementById("response").innerText = "❌ Error: Unable to get response.";
+        console.error(error);
     });
 }
