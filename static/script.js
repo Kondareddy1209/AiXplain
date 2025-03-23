@@ -1,21 +1,27 @@
-function askTutor() {
-    let question = document.getElementById("query").value;
-    if (!question.trim()) {
-        alert("Please enter a question!");
+async function askTutor() {
+    const query = document.getElementById("query").value;
+    const responseElement = document.getElementById("response");
+
+    if (!query.trim()) {
+        responseElement.innerHTML = "❌ Error: Question cannot be empty!";
         return;
     }
 
-    fetch("https://your-backend.onrender.com/ask", {  // Use full backend URL
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: question })
-    })
-    .then(response => response.json())
-    .then(data => {
-        document.getElementById("response").innerText = "💡 AI Tutor: " + data.answer;
-    })
-    .catch(error => {
-        document.getElementById("response").innerText = "❌ Error: Unable to get response.";
-        console.error(error);
-    });
+    try {
+        const response = await fetch("https://aixplain.onrender.com/ask", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ query: query }),
+        });
+
+        if (!response.ok) {
+            throw new Error(`Server error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        responseElement.innerHTML = `💡 AI Tutor: ${data.answer}`;
+    } catch (error) {
+        responseElement.innerHTML = "❌ Error: Unable to get response.";
+        console.error("Fetch error:", error);
+    }
 }
