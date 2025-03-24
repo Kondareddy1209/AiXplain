@@ -41,17 +41,22 @@ scraper_tool = load_tool("66f423426eb563fa213a3531", "Web Scraper", "Extracts da
 st.write(f"📌 wiki_tool: {'Loaded' if wiki_tool else 'Failed'}")
 st.write(f"📌 scraper_tool: {'Loaded' if scraper_tool else 'Failed'}")
 
-# Initialize AI tutor agent
-try:
-    tutor_agent = AgentFactory.create(
-        name="Virtual Tutor Agent",
-        description="An AI tutor that helps students by answering questions using Wikipedia and online resources.",
-        tools=[t for t in [wiki_tool, scraper_tool] if t is not None]  # Only add valid tools
-    )
-    st.success("✅ AI Tutor is ready!")
-except Exception as e:
-    st.error(f"❌ Error creating AI tutor: {str(e)}")
-    tutor_agent = None
+# Ensure tools are available before creating an agent
+valid_tools = [t for t in [wiki_tool, scraper_tool] if t is not None]
+
+if not valid_tools:
+    st.error("❌ No valid tools loaded! AI Tutor cannot be created.")
+else:
+    try:
+        tutor_agent = AgentFactory.create(
+            name="Virtual Tutor Agent",
+            description="An AI tutor that helps students by answering questions using Wikipedia and online resources.",
+            tools=valid_tools
+        )
+        st.success("✅ AI Tutor is ready!")
+    except Exception as e:
+        st.error(f"❌ Error creating AI tutor: {str(e)}")
+        tutor_agent = None
 
 # Handle user input and generate response
 if query and tutor_agent:
