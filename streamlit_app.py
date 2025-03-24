@@ -25,35 +25,41 @@ st.write("Ask your questions and get AI-powered answers!")
 
 query = st.text_input("Enter your question:")
 
-# Load tools with proper arguments
+# Load tools with correct initialization
 def load_tool(tool_id, tool_name, tool_description):
     try:
-        tool = Tool(id=tool_id, name=tool_name, description=tool_description)  # Fix: Add required arguments
+        tool = Tool(id=tool_id, name=tool_name, description=tool_description)
         return tool
     except Exception as e:
         st.warning(f"⚠️ Failed to load {tool_name}: {e}")
         return None
 
-wiki_tool = load_tool("6633fd59821ee31dd914e232", "Wikipedia Tool", "Fetches Wikipedia summaries.")
-scraper_tool = load_tool("66f423426eb563fa213a3531", "Web Scraper", "Scrapes data from web pages.")
+wiki_tool = load_tool("6633fd59821ee31dd914e232", "Wikipedia Tool", "Fetches answers from Wikipedia.")
+scraper_tool = load_tool("66f423426eb563fa213a3531", "Web Scraper", "Extracts data from web pages.")
 
+# Debugging: Print tool status
+st.write(f"📌 wiki_tool: {'Loaded' if wiki_tool else 'Failed'}")
+st.write(f"📌 scraper_tool: {'Loaded' if scraper_tool else 'Failed'}")
+
+# Initialize AI tutor agent
 try:
     tutor_agent = AgentFactory.create(
         name="Virtual Tutor Agent",
         description="An AI tutor that helps students by answering questions using Wikipedia and online resources.",
-        tools=[t for t in [wiki_tool, scraper_tool] if t is not None]  # Filter out None values
+        tools=[t for t in [wiki_tool, scraper_tool] if t is not None]  # Only add valid tools
     )
+    st.success("✅ AI Tutor is ready!")
 except Exception as e:
-    st.error(f"❌ Error creating AI tutor: {e}")
+    st.error(f"❌ Error creating AI tutor: {str(e)}")
     tutor_agent = None
 
-# Handle user input
+# Handle user input and generate response
 if query and tutor_agent:
     try:
         response = tutor_agent.run(query)
-        if 'data' in response and 'output' in response['data']:
-            st.success(f"💡 AI Tutor: {response['data']['output']}")
-        else:
-            st.error("Unexpected response format from AI tool!")
+        output = response.get("data", {}).get("output", "No valid response received.")
+        st.success(f"💡 AI Tutor: {output}")
+    except KeyError:
+        st.error("❌ Unexpected response format from AI tool!")
     except Exception as e:
-        st.error(f"Error processing request: {str(e)}")
+        st.error(f"❌ Error processing request: {str(e)}")
