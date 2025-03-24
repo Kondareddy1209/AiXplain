@@ -25,23 +25,23 @@ st.write("Ask your questions and get AI-powered answers!")
 
 query = st.text_input("Enter your question:")
 
-# Load tools
-def load_tool(tool_id, tool_name):
+# Load tools with proper initialization
+def load_tool(tool_id, tool_name, tool_description):
     try:
-        tool = Tool(id=tool_id)
+        tool = Tool(id=tool_id, name=tool_name, description=tool_description)
         return tool
     except Exception as e:
         st.warning(f"⚠️ Failed to load {tool_name}: {e}")
         return None
 
-wiki_tool = load_tool("6633fd59821ee31dd914e232", "Wikipedia Tool")
-scraper_tool = load_tool("66f423426eb563fa213a3531", "Web Scraper")
+wiki_tool = load_tool("6633fd59821ee31dd914e232", "Wikipedia Tool", "Fetches Wikipedia summaries.")
+scraper_tool = load_tool("66f423426eb563fa213a3531", "Web Scraper", "Scrapes data from web pages.")
 
 try:
     tutor_agent = AgentFactory.create(
         name="Virtual Tutor Agent",
         description="An AI tutor that helps students by answering questions using Wikipedia and online resources.",
-        tools=[t for t in [wiki_tool, scraper_tool] if t is not None]
+        tools=[t for t in [wiki_tool, scraper_tool] if t is not None]  # Filter out None values
     )
 except Exception as e:
     st.error(f"❌ Error creating AI tutor: {e}")
@@ -51,8 +51,9 @@ except Exception as e:
 if query and tutor_agent:
     try:
         response = tutor_agent.run(query)
-        st.success(f"💡 AI Tutor: {response['data']['output']}")
-    except KeyError:
-        st.error("Unexpected response format from AI tool!")
+        if 'data' in response and 'output' in response['data']:
+            st.success(f"💡 AI Tutor: {response['data']['output']}")
+        else:
+            st.error("Unexpected response format from AI tool!")
     except Exception as e:
         st.error(f"Error processing request: {str(e)}")
